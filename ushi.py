@@ -11,14 +11,28 @@ SCOPES = 'https://www.googleapis.com/auth/gmail.compose'
 CLIENT_SECRET_FILE = 'credentials.json'
 APPLICATION_NAME = 'Test Client'
 
+
 class Ushi():
 
     def main(self, pdf_directory,
              message_text_file, no_send_mode, working_directory):
         # Check and count the number of PDFs in the folder given
-        print("Checking number of PDF files to output...")
+        print("Checking number of PDF files to send...")
         pdf_file_list = self.get_pdf_file_list(pdf_directory)
+        try:
+            assert pdf_file_list
+        except AssertionError:
+            print("ERROR: NO PDF FILES FOUND. EXITING...")
+            return
+        print("Number of PDF files to send: {0}".format(len(pdf_file_list)))
         # Check the existence of the message text and load it into the program
+        print("Checking for existence of message text...")
+        try:
+            assert os.path.exists(message_text_file)
+        except AssertionError:
+            print("ERROR: NO MESSAGE TEXT FOUND. EXITING...")
+        with open(message_text_file, 'r') as text_file:
+            message_string = text_file.read()
         # Check that all the credentials exist for the Gmail API
         service = self.initialise_api(working_directory)
         # Print list of people to send emails to
@@ -27,10 +41,10 @@ class Ushi():
     @staticmethod
     def get_pdf_file_list(pdf_directory):
         return [file for file in os.listdir(pdf_directory)
-                if file.endswith(".pdf") and (re.match("[a-zA-Z]+[0-9]+", file)
+                if file.endswith(".pdf") and (re.match("^[a-zA-Z]+[0-9]+$", file)
                                               is not None)]
 
-    def check_gmail_api_connection(self):
+    def check_gmail_api_connection(self, service):
         return
 
     def initialise_api(self, working_directory):
