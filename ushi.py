@@ -3,6 +3,7 @@ import httplib2
 import re
 import mimetypes
 import base64
+import argparse
 
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -35,6 +36,10 @@ class Ushi():
         # Check the existence of the message text and load it into the program
         print("Checking for existence of message text...")
         message_text = self.get_message_text(message_text_file)
+        try:
+            assert message_text
+        except AssertionError:
+            return
         # Check that all the credentials exist for the Gmail API
         print("Connecting to GMail API...")
         service = self.initialise_api(working_directory)
@@ -64,10 +69,11 @@ class Ushi():
     def get_message_text(message_text_file):
         try:
             assert os.path.exists(message_text_file)
+            with open(message_text_file, 'r') as text_file:
+                return text_file.read()
         except AssertionError:
             print("ERROR: NO MESSAGE TEXT FOUND. EXITING...")
-        with open(message_text_file, 'r') as text_file:
-            return text_file.read()
+            return None
 
     def initialise_api(self, working_directory):
         credentials = self.get_credentials(working_directory)
@@ -143,7 +149,14 @@ class Ushi():
 
 
 if __name__ == "__main__":
-    # TODO Argument parsing for pdf directory, message text file, no send mode
+    parser = argparse.ArgumentParser(description="Small application to automate sending of MFCS Formative Scripts")
+    parser.add_argument('pdfs', help="The folder of PDF files to be sent to students")
+    parser.add_argument('message_text', help="Location of file containing the text of message to be sent")
+    parser.add_argument('from_email', help="Email Address that emails should be sent from")
+    parser.add_argument('subject', help="Email Subject Line")
+    parser.add_argument('--no-send', action='store_true', help="Flag to indicate if email should be sent or not")
+    parser.add_argument('working_dir', help="Working directory, should contain the Google API Credentials")
+    args = parser.parse_args()
     ushi = Ushi()
-    ushi.main("pdfs", "message.txt", "jr776@york.ac.uk",
-              "MFCS Formative Test Results", False, ".")
+    ushi.main(args.pdfs, args.message_text, args.from_email,
+              args.subject, args.no_send, args.working_dir)
