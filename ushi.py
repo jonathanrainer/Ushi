@@ -16,7 +16,7 @@ from oauth2client import tools
 from googleapiclient.errors import HttpError
 
 SCOPES = 'https://www.googleapis.com/auth/gmail.compose'
-CLIENT_SECRET_FILE = '../credentials.json'
+CLIENT_SECRET_FILE = 'credentials.json'
 APPLICATION_NAME = 'Ushi'
 
 
@@ -94,7 +94,7 @@ class Ushi():
         store = Storage(credential_path)
         credentials = store.get()
         if not credentials or credentials.invalid:
-            flow = client.flow_from_clientsecrets(CLIENT_SECRET_FILE, SCOPES)
+            flow = client.flow_from_clientsecrets(os.path.join(working_directory, CLIENT_SECRET_FILE), SCOPES)
             flow.user_agent = APPLICATION_NAME
             credentials = tools.run_flow(flow, store)
             print('Storing credentials to ' + credential_path)
