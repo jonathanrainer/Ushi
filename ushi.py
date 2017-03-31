@@ -96,7 +96,8 @@ class Ushi():
         if not credentials or credentials.invalid:
             flow = client.flow_from_clientsecrets(os.path.join(working_directory, CLIENT_SECRET_FILE), SCOPES)
             flow.user_agent = APPLICATION_NAME
-            credentials = tools.run_flow(flow, store)
+            flags = tools.argparser.parse_args(args=[])
+            credentials = tools.run_flow(flow, store, flags)
             print('Storing credentials to ' + credential_path)
         return credentials
 
